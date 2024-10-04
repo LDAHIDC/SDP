@@ -1,0 +1,224 @@
+---
+title: "SDP"
+author: "DLA"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+library(tidyverse)
+library(janitor)
+library(readxl)
+library(googlesheets4) 
+library(openxlsx) 
+library(gt) 
+library(stringi) 
+library(lubridate)  
+library(skimr)
+library(maditr)
+library(naniar) 
+library(skimr)
+library(lubridate)
+library(openxlsx)
+library(dplyr)
+library(lubridate)
+
+
+```
+
+##### TPV del mes corriente y corte del mes anterior (hoja de bonos)
+
+```{r}
+
+Base_TPV_julio<- "https://docs.google.com/spreadsheets/d/1KqGjS_TFv93x9C3L-6AkmtDG8IQcvYAMwOSBav2smdw/edit?gid=1992309109#gid=1992309109"
+
+Base_TPV_junio<- "https://docs.google.com/spreadsheets/d/1NgfbQ078xW0tNXnXvSvQ2jurbehVlN9Ulf8ATfyUlyM/edit?gid=0#gid=0"
+
+Base_TPV_mayo<- "https://docs.google.com/spreadsheets/d/18UZFq5zYOUncJHa1XEyALlSpaN310y6WOK0ExZzEhew/edit?gid=1832512593#gid=1832512593"
+
+Base_TPV_abril<- "https://docs.google.com/spreadsheets/d/1fsWsPEcQAa8cTZwdURiqH-0gKwnkMIg47gp6aodC-gw/edit?gid=1426136575#gid=1426136575"
+
+Base_TPV_marzo<- "https://docs.google.com/spreadsheets/d/1IZN4ZyH4LjIRkNYV79GtxXH5QZF-xYFcaAqM-LYpvDs/edit?gid=1322343787#gid=1322343787"
+
+Base_TPV_enero<- "https://docs.google.com/spreadsheets/d/1lEm5D8hBJuIeOw1o1wje3qcwkhb8rjMo-CmMdss8-Fk/edit#gid=1106678016"
+Base_TPV_febrero<- "https://docs.google.com/spreadsheets/d/1XqY5EoOhbtneF-43ukBsci5ZUYuQlTOku9HXZf1XJcM/edit#gid=1711853045"
+
+#Base_seguimiento_growth<- "https://docs.google.com/spreadsheets/d/1q8jrbZbme5tH5UxO853A9aPTfDOHogVY9S1JTflGd7k/edit#gid=1180057662"
+
+Corte_puntos <- "https://docs.google.com/spreadsheets/d/155ZhXAbCCEYY8aEMYSRh_eiEyXhLHgVfFBzDThRLTok/edit#gid=898724988"
+
+Corte_puntos_2<-"https://docs.google.com/spreadsheets/d/1d-ftZaQ9csNw1zdWi65pq5l916_sbQUswjodcL3KFm8/edit?gid=0#gid=0"
+
+
+TPV_enero<-read_sheet(Base_TPV_enero, 
+           range = "Avance_Asesores_ac_M0")
+
+TPV_febrero<-read_sheet(Base_TPV_febrero, 
+           range = "Avance_Asesores_ac_M0")
+
+TPV_marzo<-read_sheet(Base_TPV_marzo, 
+ range = "BONOS_X_ASESOR_MARZO")
+
+
+TPV_abril<-read_sheet(Base_TPV_abril, 
+ range = "BONOS_X_ASESOR_ABRIL")
+
+
+TPV_mayo <-read_sheet(Base_TPV_mayo, 
+ range = "BONOS_X_ASESOR_MAYO")
+
+TPV_junio <-read_sheet(Base_TPV_junio, 
+ range = "BONOS_X_ASESOR_JUNIO")
+
+TPV_julio <-read_sheet(Base_TPV_julio, 
+ range = "BONOS_X_ASESOR")
+
+
+#### Renombra columna de TPV de meses anteriores * optimizar con una función
+
+mes_palabra_enero <- tail(strsplit(deparse(substitute(Base_TPV_enero)), "_")[[1]], 1)
+
+TPV_enero<- TPV_enero %>% 
+  rename_with(~paste0(., "_", mes_palabra_enero), "sumaTPV_NEW_SELLER_2024_confirmado")
+
+
+mes_palabra_febrero <- tail(strsplit(deparse(substitute(Base_TPV_febrero)), "_")[[1]], 1)
+
+TPV_febrero<- TPV_febrero %>% 
+  rename_with(~paste0(., "_", mes_palabra_febrero), "sumaTPV_NEW_SELLER_2024_confirmado")
+
+
+mes_palabra_marzo <- tail(strsplit(deparse(substitute(Base_TPV_marzo)), "_")[[1]], 1)
+
+TPV_marzo<- TPV_marzo %>% 
+  rename_with(~paste0(., "_", mes_palabra_marzo), "sumaTPV_NEW_SELLER_2024_confirmado")
+
+mes_palabra_abril <- tail(strsplit(deparse(substitute(Base_TPV_abril)), "_")[[1]], 1)
+
+TPV_abril<- TPV_abril %>% 
+  rename_with(~paste0(., "_", mes_palabra_abril), "sumaTPV_NEW_SELLER_2024_confirmado")
+
+mes_palabra_mayo <- tail(strsplit(deparse(substitute(Base_TPV_mayo)), "_")[[1]], 1)
+
+TPV_mayo<- TPV_mayo %>% 
+  rename_with(~paste0(., "_", mes_palabra_mayo), "sumaTPV_NEW_SELLER_2024_confirmado")
+
+
+mes_palabra_junio <- tail(strsplit(deparse(substitute(Base_TPV_junio)), "_")[[1]], 1)
+
+TPV_junio<- TPV_junio %>% 
+  rename_with(~paste0(., "_", mes_palabra_junio), "sumaTPV_NEW_SELLER_2024_confirmado")
+
+
+```
+
+
+
+```{r}
+
+#Columna con el cierre de TPV de meses anteriores
+
+lista_TPV <- list(
+  TPV_enero[, c("colaborador", "sumaTPV_NEW_SELLER_2024_confirmado_enero")],
+  TPV_febrero[, c("colaborador", "sumaTPV_NEW_SELLER_2024_confirmado_febrero")],
+  TPV_marzo[, c("colaborador", "sumaTPV_NEW_SELLER_2024_confirmado_marzo")],
+  TPV_abril[, c("colaborador", "sumaTPV_NEW_SELLER_2024_confirmado_abril")],
+  TPV_mayo[, c("colaborador", "sumaTPV_NEW_SELLER_2024_confirmado_mayo")],
+  TPV_junio[, c("colaborador", "sumaTPV_NEW_SELLER_2024_confirmado_junio")]
+)
+
+TPV_julio1 <- Reduce(function(x, y) merge(x, y, by = "colaborador", all.x = TRUE), 
+                     lista_TPV, 
+                     init = TPV_julio)
+
+
+limpiar_NA <- function(data, columnas) {
+  for (col in columnas) {
+    data[[col]][is.na(data[[col]])] <- 0
+  }
+  return(data)
+}
+
+columnas_na <- c(
+  "sumaTPV_NEW_SELLER_2024_confirmado_enero",
+  "sumaTPV_NEW_SELLER_2024_confirmado_febrero",
+  "sumaTPV_NEW_SELLER_2024_confirmado_marzo",
+  "sumaTPV_NEW_SELLER_2024_confirmado_abril",
+  "sumaTPV_NEW_SELLER_2024_confirmado_mayo",
+  "sumaTPV_NEW_SELLER_2024_confirmado_junio"
+)
+
+TPV_julio1 <- limpiar_NA(TPV_julio1, columnas_na)
+
+
+```
+
+
+##Asignación de puntos
+
+```{r}
+
+## Primera venta
+
+TPV_julio1$Primera_venta <- ifelse(TPV_julio1$zona2!= "MONTERREY" &  TPV_julio1$terminales_candado5000 > 0 & (TPV_julio1$status_fdv_evaluable == "PROCESO" | TPV_julio1$status_fdv_evaluable == "NEW"), 150, ifelse(TPV_julio1$zona2== "MONTERREY" &  TPV_julio1$terminales_candado7500 > 0 & (TPV_julio1$status_fdv_evaluable == "PROCESO" | TPV_julio1$status_fdv_evaluable == "NEW"), 150, 0))
+
+TPV_julio1$Primera_venta[is.na(TPV_julio1$Primera_venta)] <- 0
+
+
+####################################################  NEW  #################################################
+
+### Primer Hilo y SMB ****** si en algún punto de julio fueron New 
+##Asignamos rango dentro del cual smbs y hilos puntuan y probablmente el asesor haya sido New. Al menos la mitad del mes en curso. 
+
+
+TPV_julio1$Pts_New <- ifelse(TPV_julio1$smbi > 0 & TPV_julio1$fecha_de_ingreso> as.Date("2024-06-07") & TPV_julio1$fecha_de_ingreso< as.Date("2024-07-23"),400,ifelse(TPV_julio1$hilos > 0 & TPV_julio1$fecha_de_ingreso> as.Date("2024-06-07")& TPV_julio1$fecha_de_ingreso< as.Date("2024-07-23"),300,0))
+
+
+TPV_julio1$Pts_New[is.na(TPV_julio1$Pts_New)] <- 0
+
+#Primer millón para New (extendido a Legacy)
+
+TPV_julio1$TPV_Acumulado<- rowSums(TPV_julio1[,c("sumaTPV_NEW_SELLER_2024_confirmado_enero","sumaTPV_NEW_SELLER_2024_confirmado_febrero","sumaTPV_NEW_SELLER_2024_confirmado_marzo","sumaTPV_NEW_SELLER_2024_confirmado_abril", "sumaTPV_NEW_SELLER_2024_confirmado_mayo", "sumaTPV_NEW_SELLER_2024_confirmado_junio",  "sumaTPV_NEW_SELLER_2024_confirmado")])
+
+TPV_julio1$TPV_Acumulado[is.na(TPV_julio1$TPV_Acumulado)] <- 0
+
+TPV_julio1$millon<- ifelse(TPV_julio1$TPV_Acumulado > 1000000 & as.Date("2024-07-30") - as.Date(TPV_julio1$fecha_de_ingreso) <= 38,500,0)
+
+
+####Terminales Topadas a 7 
+
+
+TPV_julio1$Pts_devices <- ifelse( TPV_julio1$zona2!= "MONTERREY",
+    TPV_julio1$terminales_candado5000_NEW_SELLER_confirmado * 100, ifelse( TPV_julio1$zona2== "MONTERREY", TPV_julio1$terminales_candado7500 * 100, 0))
+
+
+TPV_julio1$Pts_devices_topado <- ifelse(TPV_julio1$Pts_devices >= 700, 700, TPV_julio1$Pts_devices)
+ 
+####################################################  LEGACY  ################################################
+
+### Puntos por crecimiento como legacy
+
+
+TPV_julio1$Pts_Legacy <- ifelse( TPV_julio1$status_fdv_evaluable == "LEGACY",
+  ifelse(TPV_julio1$sumaTPV_NEW_SELLER_2024_confirmado > (TPV_julio1$sumaTPV_NEW_SELLER_2024_confirmado_junio + (TPV_julio1$sumaTPV_NEW_SELLER_2024_confirmado_junio * 0.2)),400,
+    ifelse( TPV_julio1$sumaTPV_NEW_SELLER_2024_confirmado > (TPV_julio1$sumaTPV_NEW_SELLER_2024_confirmado_junio + (TPV_julio1$sumaTPV_NEW_SELLER_2024_confirmado_junio * 0.15)),300,
+        ifelse( TPV_julio1$sumaTPV_NEW_SELLER_2024_confirmado > (TPV_julio1$sumaTPV_NEW_SELLER_2024_confirmado_junio + (TPV_julio1$sumaTPV_NEW_SELLER_2024_confirmado_junio * 0.1)), 200,ifelse(TPV_julio1$sumaTPV_NEW_SELLER_2024_confirmado >= 0, 0, "NA")))),NA)
+    
+ TPV_julio1$Pts_Legacy[is.na(TPV_julio1$Pts_Legacy)] <- 0
+  
+
+####################################################  TOTAL  #################################################
+
+TPV_julio1$Pts_Total <- rowSums(TPV_julio1[,c("Pts_New", "Pts_devices","Pts_Legacy","Primera_venta", "millon")])
+
+ 
+TPV_julio1$Pts_Tota_topado <- rowSums(TPV_julio1[,c("Pts_New", "Pts_devices_topado","Pts_Legacy","Primera_venta", "millon")]) 
+ 
+write_sheet(TPV_julio1, ss= Corte_puntos_2 , sheet = "TRIAL_1")
+
+
+```
